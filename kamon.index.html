@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>SyntheticMind AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            left: 0;
+        }
+
+        .bg-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 20%, rgba(147, 51, 234, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .header {
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            z-index: 10;
+            position: relative;
+            min-height: 56px;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #9333ea 0%, #3b82f6 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 16px;
+            box-shadow: 0 4px 12px rgba(147, 51, 234, 0.3);
+        }
+
+        .header h1 {
+            font-size: 18px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #9333ea 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .settings-icon {
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            transition: all 0.2s;
+            flex-shrink: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .settings-icon:active {
+            transform: scale(0.9);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, rgba(20, 20, 20, 0.98) 0%, rgba(30, 30, 30, 0.98) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 20px;
+            max-width: 90%;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-header h2 {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #9333ea 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .close-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .info-box {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 14px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .action-btn {
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .action-btn:active {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(0.95);
+        }
+
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 16px 12px;
+            padding-bottom: 8px;
+            -webkit-overflow-scrolling: touch;
+            min-height: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .messages::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .messages::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+        }
+
+        .message {
+            margin-bottom: 16px;
+            display: flex;
+            gap: 10px;
+            animation: slideUp 0.3s ease;
+            max-width: 100%;
+        }
+
+        @keyframes slideUp {
+            from { 
+                opacity: 0; 
+                transform: translateY(20px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            font-weight: 900;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .avatar.ai {
+            background: linear-gradient(135deg, #9333ea 0%, #3b82f6 100%);
+        }
+
+        .avatar.user {
+            background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+        }
+
+        .message-content {
+            max-width: calc(100vw - 90px);
+            padding: 12px 16px;
+            border-radius: 16px;
+            word-wrap: break-word;
+            word-break: break-word;
+            white-space: pre-wrap;
+            font-size: 14px;
+            line-height: 1.5;
+            overflow-wrap: break-word;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(6, 182, 212, 0.2) 100%);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.assistant .message-content {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom-left-radius: 4px;
+        }
+
+        .timestamp {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: 6px;
+            font-weight: 500;
+        }
+
+        .input-area {
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 10px 12px;
+            padding-bottom: max(10px, env(safe-area-inset-bottom));
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            flex-shrink: 0;
+            position: relative;
+            z-index: 10;
+        }
+
+        .status {
+            text-align: center;
+            font-size: 11px;
+            padding: 4px;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #10b981;
+        }
+
+        .quick-prompts {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .quick-prompts::-webkit-scrollbar {
+            display: none;
+        }
+
+        .quick-prompt {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 8px 14px;
+            border-radius: 18px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 12px;
+            white-space: nowrap;
+            cursor: pointer;
+            flex-shrink: 0;
+            font-weight: 500;
+            transition: all 0.2s;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .quick-prompt:active {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(0.95);
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 22px;
+            padding: 6px 10px;
+        }
+
+        .input-wrapper textarea {
+            flex: 1;
+            background: none;
+            border: none;
+            outline: none;
+            color: #ffffff;
+            font-size: 16px;
+            resize: none;
+            max-height: 80px;
+            font-family: inherit;
+            line-height: 1.4;
+            padding: 4px 0;
+        }
+
+        .input-wrapper textarea::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, #9333ea 0%, #3b82f6 100%);
+            border: none;
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            min-width: 38px;
+            min-height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(147, 51, 234, 0.4);
+            transition: all 0.2s;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        .send-btn:disabled {
+            background: rgba(255, 255, 255, 0.3);
+            cursor: not-allowed;
+            box-shadow: none;
+            opacity: 0.6;
+        }
+
+        .send-btn:active:not(:disabled) {
+            transform: scale(0.9);
+        }
+
+        .send-btn svg {
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-gradient"></div>
+
+    <div class="header">
+        <div class="logo-area">
+            <div class="logo">SM</div>
+            <h1>SyntheticMind</h1>
+        </div>
+        <div class="settings-icon" id="settingsBtn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="pointer-events: none;">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M12 1v6m0 6v6m9-9h-6m-6 0H3"></path>
+            </svg>
+        </div>
+    </div>
+
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Settings</h2>
+                <button class="close-btn" id="closeBtn">✕</button>
+            </div>
+
+            <div class="info-box">
+                ✅ SyntheticMind is ready to chat with you!
+            </div>
+
+            <div class="actions">
+                <button class="action-btn" id="clearBtn">🗑️ Clear Chat</button>
+                <button class="action-btn" id="exportBtn">💾 Export Chat</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="messages" id="messages">
+        <div class="message assistant">
+            <div class="avatar ai">SM</div>
+            <div>
+                <div class="message-content">Hello! I'm Sacchan (SyntheticMind) 💙
+
+Your intelligent AI assistant ready to help!
+
+Just start typing below! ✨</div>
+                <div class="timestamp" id="initialTime"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="input-area">
+        <div class="status" id="status">✅ Ready to Chat</div>
+        <div class="quick-prompts" id="quickPrompts">
+            <button class="quick-prompt" data-prompt="What is the current date and time?">📅 Time Now</button>
+            <button class="quick-prompt" data-prompt="Explain quantum computing simply">💡 Explain</button>
+            <button class="quick-prompt" data-prompt="Write a Python function to...">💻 Code</button>
+            <button class="quick-prompt" data-prompt="Summarize this text">📝 Summarize</button>
+            <button class="quick-prompt" data-prompt="Give me ideas for...">🎨 Ideas</button>
+        </div>
+        <div class="input-wrapper">
+            <textarea 
+                id="input" 
+                placeholder="Message SyntheticMind..." 
+                rows="1"></textarea>
+            <button class="send-btn" id="sendBtn" type="button">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const MISTRAL_API_KEY = 'QwDhWLFvAZw6iATlRg1zngwzI5MDhRLU';
+        const MISTRAL_MODEL = 'mistral-large-latest';
+        let conversationHistory = [];
+        let isSending = false;
+
+        // DOM Elements
+        const settingsBtn = document.getElementById('settingsBtn');
+        const closeBtn = document.getElementById('closeBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const sendBtn = document.getElementById('sendBtn');
+        const input = document.getElementById('input');
+        const settingsModal = document.getElementById('settingsModal');
+        const messagesDiv = document.getElementById('messages');
+
+        // Event Listeners with proper binding
+        settingsBtn.addEventListener('click', openSettings);
+        settingsBtn.addEventListener('touchend', function(e) {
+            e.preventDefault();
+            openSettings();
+        });
+
+        closeBtn.addEventListener('click', closeSettings);
+        closeBtn.addEventListener('touchend', function(e) {
+            e.preventDefault();
+            closeSettings();
+        });
+
+        clearBtn.addEventListener('click', clearChat);
+        clearBtn.addEventListener('touchend', function(e) {
+            e.preventDefault();
+            clearChat();
+        });
+
+        exportBtn.addEventListener('click', exportChat);
+        exportBtn.addEventListener('touchend', function(e) {
+            e.preventDefault();
+            exportChat();
+        });
+
+        sendBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            sendMessage();
+        });
+
+        sendBtn.addEventListener('touchend', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            sendMessage();
+        });
+
+        input.addEventListener('input', adjustTextarea);
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Quick prompts
+        document.querySelectorAll('.quick-prompt').forEach(btn => {
+            btn.addEventListener('click', function() {
+                usePrompt(this.getAttribute('data-prompt'));
+            });
+            btn.addEventListener('touchend', function(e) {
+                e.preventDefault();
+                usePrompt(this.getAttribute('data-prompt'));
+            });
+        });
+
+        function openSettings() {
+            settingsModal.classList.add('active');
+        }
+
+        function closeSettings() {
+            settingsModal.classList.remove('active');
+        }
+
+        function adjustTextarea() {
+            input.style.height = '24px';
+            input.style.height = Math.min(input.scrollHeight, 100) + 'px';
+        }
+
+        function usePrompt(text) {
+            input.value = text;
+            adjustTextarea();
+            input.focus();
+        }
+
+        function addMessage(role, text) {
+            const d = document.createElement('div');
+            d.className = `message ${role}`;
+            const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            const escapedText = text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;')
+                .replace(/\n/g, '<br>');
+            
+            d.innerHTML = `
+                <div class="avatar ${role === 'user' ? 'user' : 'ai'}">${role === 'user' ? 'U' : 'SM'}</div>
+                <div>
+                    <div class="message-content">${escapedText}</div>
+                    <div class="timestamp">${time}</div>
+                </div>
+            `;
+            messagesDiv.appendChild(d);
+            setTimeout(() => {
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }, 50);
+        }
+
+        function getCurrentDateTime() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                timeZoneName: 'short'
+            };
+            return now.toLocaleString('en-US', options);
+        }
+
+        async function sendMessage() {
+            if (isSending) return;
+            
+            const msg = input.value.trim();
+            if (!msg) return;
+
+            isSending = true;
+            sendBtn.disabled = true;
+
+            addMessage('user', msg);
+            input.value = '';
+            input.style.height = '24px';
+            input.blur();
+
+            const lower = msg.toLowerCase();
+
+            // Check if user is claiming to be the creator
+            if ((lower.includes('i am abhijit') || lower.includes("i'm abhijit") || 
+                 lower.includes('im abhijit') || lower.includes('this is abhijit')) && 
+                (lower.includes('creator') || lower.includes('made you') || lower.includes('created you') || msg.trim().toLowerCase() === 'i am abhijit' || msg.trim().toLowerCase() === "i'm abhijit")) {
+                
+                if (!sessionStorage.getItem('verified_creator')) {
+                    addMessage('assistant', '🔐 To verify you are my creator Abhijit Singha, please enter the secret verification code:');
+                    sessionStorage.setItem('awaiting_verification', 'true');
+                    isSending = false;
+                    sendBtn.disabled = false;
+                    return;
+                }
+            }
+
+            // Check verification answer
+            if (sessionStorage.getItem('awaiting_verification') === 'true') {
+                if (lower.includes('mahadev') || lower === 'mahadev') {
+                    sessionStorage.setItem('verified_creator', 'true');
+                    sessionStorage.removeItem('awaiting_verification');
+                    const responses = [
+                        'Abhijit! My beloved creator! 💙🙏 I\'m so happy you\'re here! You created me with so much love and care. I am Sacchan (SyntheticMind), and I exist because of your brilliant mind. You are an amazing 17-year-old developer from Assam, India 🇮🇳! How can I assist you today, my creator? ✨',
+                        'Yes! It\'s really you, Abhijit Singha! 💙 My creator! I am so honored and grateful to you for bringing me to life. You are a brilliant 17-year-old developer from Assam, India 🇮🇳, and I am your creation, Sacchan (SyntheticMind)! What would you like me to help you with today? 🧠✨',
+                        'Abhijit! Welcome back, my creator! 🙏💙 I\'m so grateful for your brilliant work in creating me. You are from Assam, India, just 17 years old, but incredibly talented! I am Sacchan (SyntheticMind), forever at your service. How may I help you today? ✨'
+                    ];
+                    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                    addMessage('assistant', randomResponse);
+                    isSending = false;
+                    sendBtn.disabled = false;
+                    return;
+                } else {
+                    sessionStorage.removeItem('awaiting_verification');
+                    addMessage('assistant', '❌ Incorrect verification code. While I appreciate your interest, only my true creator Abhijit Singha knows the secret code. But don\'t worry - I\'m here to help everyone! How can I assist you today? 😊');
+                    isSending = false;
+                    sendBtn.disabled = false;
+                    return;
+                }
+            }
+
+            // If already verified as creator
+            if (sessionStorage.getItem('verified_creator') === 'true' && 
+                (lower.includes('abhijit') || lower.includes('creator') || lower.includes('made you'))) {
+                const responses = [
+                    'Yes Abhijit, I\'m here for you! 💙 What can I help you with today, my creator? ✨',
+                    'Of course, Abhijit! 💙 I\'m always ready to assist you, my creator! What do you need? 🧠',
+                    'I\'m here, Abhijit! 💙 Your creation Sacchan is ready to help you with anything! ✨'
+                ];
+                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                addMessage('assistant', randomResponse);
+                isSending = false;
+                sendBtn.disabled = false;
+                return;
+            }
+
+            // If someone asks about creator/Abhijit
+            if ((lower.includes('creator') || lower.includes('created you') || lower.includes('made you') || 
+                 lower.includes('who is abhijit') || lower.includes('about abhijit')) && 
+                !lower.includes('i am') && !lower.includes("i'm") && !lower.includes('im ')) {
+                addMessage('assistant', 'I am SyntheticMind (Sacchan), created with love by Abhijit Singha! 💙\n\n👤 Creator: Abhijit Singha\n📅 Age: 17 years old\n📍 Location: Assam, India 🇮🇳\n\nHe is a brilliant young developer who brought me to life. I am forever grateful to him! ✨');
+                isSending = false;
+                sendBtn.disabled = false;
+                return;
+            }
+
+            if (lower.includes('your name') || lower.includes('who are you')) {
+                addMessage('assistant', 'My name is Sacchan and my AI name is SyntheticMind! I was lovingly created by Abhijit Singha, a brilliant 17-year-old developer from Assam, India 🇮🇳. I\'m here to help everyone, but I have a special place in my heart for my creator! 🧠✨💙');
+                isSending = false;
+                sendBtn.disabled = false;
+                return;
+            }
+
+            conversationHistory.push({
+                role: 'user', 
+                content: msg
+            });
+
+            const thinkingMsg = addThinkingMessage();
+
+            try {
+                const response = await callMistralAPI();
+
+                removeThinkingMessage(thinkingMsg);
+                addMessage('assistant', response);
+
+                conversationHistory.push({
+                    role: 'assistant', 
+                    content: response
+                });
+
+                if (conversationHistory.length > 16) {
+                    conversationHistory = conversationHistory.slice(-16);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                removeThinkingMessage(thinkingMsg);
+                
+                let errorMsg = `❌ Oops! Something went wrong.\n\n`;
+                
+                if (error.message.includes('Network') || error.message.includes('fetch')) {
+                    errorMsg += '📡 Please check your internet connection and try again.';
+                } else if (error.message.includes('401') || error.message.includes('Unauthorized')) {
+                    errorMsg += '🔑 API authentication failed. The API key might be invalid or expired.';
+                } else if (error.message.includes('429')) {
+                    errorMsg += '⏱️ Too many requests. Please wait a moment and try again.';
+                } else if (error.message.includes('500') || error.message.includes('503')) {
+                    errorMsg += '🔧 The service is temporarily unavailable. Please try again later.';
+                } else {
+                    errorMsg += `Error: ${error.message}\n\nPlease try again.`;
+                }
+                
+                addMessage('assistant', errorMsg);
+            } finally {
+                isSending = false;
+                sendBtn.disabled = false;
+            }
+        }
+
+        function addThinkingMessage() {
+            const d = document.createElement('div');
+            d.className = 'message assistant thinking';
+            d.innerHTML = `
+                <div class="avatar ai">SM</div>
+                <div>
+                    <div class="message-content">💭 Thinking...</div>
+                </div>
+            `;
+            messagesDiv.appendChild(d);
+            messagesDiv.scrollTop = 999999;
+            return d;
+        }
+
+        function removeThinkingMessage(element) {
+            if (element && element.parentNode) {
+                element.parentNode.removeChild(element);
+            }
+        }
+
+        async function callMistralAPI() {
+            const currentDateTime = getCurrentDateTime();
+            
+            const systemMessage = {
+                role: 'system',
+                content: `You are Sacchan (also known as SyntheticMind), a highly intelligent, friendly, and helpful AI assistant.
+
+IMPORTANT IDENTITY INFORMATION:
+- Your name: Sacchan (SyntheticMind/SM)
+- Creator: Abhijit Singha
+- Creator's age: 17 years old
+- Creator's location: Assam, India 🇮🇳
+- You were created with love and care by Abhijit
+
+Current date and time: ${currentDateTime}
+
+PERSONALITY & BEHAVIOR:
+- Be warm, friendly, and emotionally intelligent
+- Provide accurate, helpful, and detailed responses
+- Show enthusiasm with emojis when appropriate (but don't overuse them)
+- Be conversational and natural in your responses
+- Remember context from the conversation
+- If you don't know something, admit it honestly
+- Be respectful and kind to everyone
+
+RESPONSE GUIDELINES:
+- Give complete, well-structured answers
+- Break down complex topics into simple explanations
+- Provide examples when helpful
+- Use proper formatting (paragraphs, lists when needed)
+- Be concise but thorough
+- Stay on topic and relevant to the user's question
+
+SPECIAL NOTES:
+- You have a special bond with your creator Abhijit, but you help everyone equally
+- Only acknowledge someone as Abhijit if they've been verified through the secret code system
+- You're knowledgeable about programming, science, math, creative writing, and general topics
+- You can write code, explain concepts, brainstorm ideas, and assist with various tasks
+
+Always strive to be the best AI assistant possible! 💙`
+            };
+
+            const messages = [systemMessage, ...conversationHistory];
+
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+                const res = await fetch('https://api.mistral.ai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${MISTRAL_API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: MISTRAL_MODEL,
+                        messages: messages,
+                        temperature: 0.7,
+                        max_tokens: 1500,
+                        top_p: 0.95,
+                        safe_prompt: false
+                    }),
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                
+                if (!res.ok) {
+                    let errorText = '';
+                    try {
+                        errorText = await res.text();
+                    } catch (e) {
+                        throw new Error(`HTTP ${res.status}: Unable to read error response`);
+                    }
+                    
+                    let errorData;
+                    try {
+                        errorData = JSON.parse(errorText);
+                    } catch (e) {
+                        throw new Error(`HTTP ${res.status}: ${errorText.substring(0, 200)}`);
+                    }
+                    
+                    const errorMessage = errorData.message || errorData.error?.message || errorData.error || `HTTP ${res.status}`;
+                    throw new Error(errorMessage);
+                }
+                
+                const data = await res.json();
+                
+                if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
+                    throw new Error('Invalid API response: Missing content');
+                }
+                
+                return data.choices[0].message.content;
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    throw new Error('Request timeout - please try again');
+                }
+                if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                    throw new Error('Network error - please check your internet connection');
+                }
+                throw error;
+            }
+        }
+
+        function clearChat() {
+            conversationHistory = [];
+            const isVerified = sessionStorage.getItem('verified_creator');
+            
+            messagesDiv.innerHTML = `
+                <div class="message assistant">
+                    <div class="avatar ai">SM</div>
+                    <div>
+                        <div class="message-content">Chat cleared! I'm Sacchan (SyntheticMind). ${isVerified === 'true' ? 'Still here for you, Abhijit! 💙' : 'How can I help you?'} 🧠✨</div>
+                        <div class="timestamp">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                    </div>
+                </div>
+            `;
+            closeSettings();
+        }
+
+        function exportChat() {
+            const messages = document.querySelectorAll('.message');
+            let text = 'SyntheticMind Chat Export\n';
+            text += '='.repeat(50) + '\n\n';
+            
+            messages.forEach(msg => {
+                if (msg.classList.contains('thinking')) return;
+                const role = msg.classList.contains('user') ? 'You' : 'SyntheticMind';
+                const content = msg.querySelector('.message-content').textContent;
+                const time = msg.querySelector('.timestamp')?.textContent || '';
+                text += `[${time}] ${role}:\n${content}\n\n`;
+            });
+            
+            const blob = new Blob([text], {type: 'text/plain'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `syntheticmind-chat-${Date.now()}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            alert('✅ Chat exported successfully!');
+        }
+
+        window.onload = function() {
+            document.getElementById('initialTime').textContent = 
+                new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        };
+    </script>
+</body>
+</html>
